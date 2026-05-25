@@ -1,0 +1,162 @@
+{
+    "target": "http://127.0.0.1:8080",
+    "timestamp": "2026-05-25 14:39:42",
+    "results": {
+        "headers": {
+            "missing_headers": [
+                {
+                    "header": "Content-Security-Policy",
+                    "description": "Restricts resources (such as JavaScript, CSS, Images) that the browser is allowed to load.",
+                    "recommendation": "Define a strict Content Security Policy to prevent XSS and data injection attacks."
+                },
+                {
+                    "header": "X-Frame-Options",
+                    "description": "Protects users against clickjacking attacks by controlling whether the site can be framed.",
+                    "recommendation": "Set to 'DENY' or 'SAMEORIGIN'."
+                },
+                {
+                    "header": "Strict-Transport-Security",
+                    "description": "Enforces secure (HTTPS) connections to the server.",
+                    "recommendation": "Configure with a max-age (e.g., 'max-age=63072000; includeSubDomains; preload')."
+                },
+                {
+                    "header": "X-Content-Type-Options",
+                    "description": "Prevents the browser from MIME-sniffing a response away from the declared content-type.",
+                    "recommendation": "Set to 'nosniff'."
+                },
+                {
+                    "header": "Referrer-Policy",
+                    "description": "Controls how much referrer information the browser includes with requests.",
+                    "recommendation": "Set to a restrictive value such as 'strict-origin-when-cross-origin' or 'no-referrer'."
+                },
+                {
+                    "header": "Permissions-Policy",
+                    "description": "Allows web developers to selectively enable, disable, and modify the behavior of browser features and APIs.",
+                    "recommendation": "Configure permissions-policy to restrict access to sensitive browser features (e.g., camera, microphone, geolocation)."
+                }
+            ],
+            "present_headers": [],
+            "verbose_headers": [
+                {
+                    "header": "Server",
+                    "value": "SimpleHTTP/0.6 Python/3.14.4, MockServer/1.2.3-Beta (Ubuntu)",
+                    "severity": "Low",
+                    "description": "Exposes server configuration details which could assist reconnaissance.",
+                    "recommendation": "Remove the 'Server' header or sanitize its value in the server configuration."
+                },
+                {
+                    "header": "X-Powered-By",
+                    "value": "CustomPHP-Legacy",
+                    "severity": "Low",
+                    "description": "Exposes server configuration details which could assist reconnaissance.",
+                    "recommendation": "Remove the 'X-Powered-By' header or sanitize its value in the server configuration."
+                },
+                {
+                    "header": "X-AspNet-Version",
+                    "value": "4.0.30319",
+                    "severity": "Low",
+                    "description": "Exposes server configuration details which could assist reconnaissance.",
+                    "recommendation": "Remove the 'X-AspNet-Version' header or sanitize its value in the server configuration."
+                },
+                {
+                    "header": "Access-Control-Allow-Origin",
+                    "value": "* with credentials",
+                    "severity": "Medium",
+                    "description": "Overly permissive CORS policy allows any origin to read response data via credentialed requests.",
+                    "recommendation": "Configure specific, trusted origins instead of a wildcard when credentials are enabled."
+                }
+            ]
+        },
+        "cookies": [
+            {
+                "name": "session_token",
+                "domain": "127.0.0.1",
+                "path": "/",
+                "issues": [
+                    {
+                        "attribute": "HttpOnly",
+                        "severity": "Medium",
+                        "description": "Cookie lacks the 'HttpOnly' flag, leaving it vulnerable to theft via Cross-Site Scripting (XSS).",
+                        "recommendation": "Configure the application or server to append '; HttpOnly' to the Set-Cookie directive."
+                    },
+                    {
+                        "attribute": "Secure",
+                        "severity": "Medium",
+                        "description": "Cookie lacks the 'Secure' flag, allowing it to be transmitted in cleartext over unencrypted HTTP.",
+                        "recommendation": "Configure the application or server to append '; Secure' to the Set-Cookie directive."
+                    },
+                    {
+                        "attribute": "SameSite",
+                        "severity": "Low",
+                        "description": "Cookie does not explicitly define a 'SameSite' attribute, relying on default browser behavior.",
+                        "recommendation": "Set the 'SameSite' attribute to 'Lax' or 'Strict' to prevent Cross-Site Request Forgery (CSRF)."
+                    }
+                ]
+            },
+            {
+                "name": "user_preference",
+                "domain": "127.0.0.1",
+                "path": "/",
+                "issues": [
+                    {
+                        "attribute": "HttpOnly",
+                        "severity": "Medium",
+                        "description": "Cookie lacks the 'HttpOnly' flag, leaving it vulnerable to theft via Cross-Site Scripting (XSS).",
+                        "recommendation": "Configure the application or server to append '; HttpOnly' to the Set-Cookie directive."
+                    },
+                    {
+                        "attribute": "Secure",
+                        "severity": "Medium",
+                        "description": "Cookie lacks the 'Secure' flag, allowing it to be transmitted in cleartext over unencrypted HTTP.",
+                        "recommendation": "Configure the application or server to append '; Secure' to the Set-Cookie directive."
+                    },
+                    {
+                        "attribute": "SameSite",
+                        "severity": "Low",
+                        "description": "Cookie does not explicitly define a 'SameSite' attribute, relying on default browser behavior.",
+                        "recommendation": "Set the 'SameSite' attribute to 'Lax' or 'Strict' to prevent Cross-Site Request Forgery (CSRF)."
+                    }
+                ]
+            }
+        ],
+        "robots": {
+            "exists": true,
+            "status_code": 200,
+            "disallowed_paths": [
+                "/admin/",
+                "/private/config.json",
+                "/backup/db.sql"
+            ],
+            "sensitive_paths": [
+                {
+                    "path": "/admin/",
+                    "matched_keywords": [
+                        "admin"
+                    ],
+                    "description": "Exposes route pattern containing administrative/sensitive keywords ('admin').",
+                    "recommendation": "Avoid exposing internal, sensitive, or developmental URLs in robots.txt. Use proper authorization mechanisms to secure endpoints instead of relying on crawler exclusions (security through obscurity)."
+                },
+                {
+                    "path": "/private/config.json",
+                    "matched_keywords": [
+                        "config",
+                        "private"
+                    ],
+                    "description": "Exposes route pattern containing administrative/sensitive keywords ('config, private').",
+                    "recommendation": "Avoid exposing internal, sensitive, or developmental URLs in robots.txt. Use proper authorization mechanisms to secure endpoints instead of relying on crawler exclusions (security through obscurity)."
+                },
+                {
+                    "path": "/backup/db.sql",
+                    "matched_keywords": [
+                        "backup",
+                        "db",
+                        "sql"
+                    ],
+                    "description": "Exposes route pattern containing administrative/sensitive keywords ('backup, db, sql').",
+                    "recommendation": "Avoid exposing internal, sensitive, or developmental URLs in robots.txt. Use proper authorization mechanisms to secure endpoints instead of relying on crawler exclusions (security through obscurity)."
+                }
+            ],
+            "sitemaps": []
+        }
+    }
+}

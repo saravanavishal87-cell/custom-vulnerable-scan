@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulcan Security Configuration Audit Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --surface-color: rgba(20, 27, 45, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            
+            --severity-high: #ef4444;
+            --severity-medium: #f59e0b;
+            --severity-low: #3b82f6;
+            --severity-info: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(20, 27, 45, 0.7) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .meta-val {
+            font-size: 1.1rem;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        /* Dashboard Overview */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-name {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Vulnerability Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-high { background-color: rgba(239, 68, 68, 0.15); color: var(--severity-high); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-medium { background-color: rgba(245, 158, 11, 0.15); color: var(--severity-medium); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-low { background-color: rgba(59, 130, 246, 0.15); color: var(--severity-low); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-info { background-color: rgba(16, 185, 129, 0.15); color: var(--severity-info); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        /* Main Sections */
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1.2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .vuln-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .vuln-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .vuln-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .vuln-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .vuln-desc {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .vuln-remediation {
+            background: rgba(99, 102, 241, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .remediation-title {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .text-green { color: var(--severity-info); font-weight: 500; }
+        .text-red { color: var(--severity-high); font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Header Card -->
+        <div class="header-card">
+            <h1>Vulcan Configuration Auditor</h1>
+            <p style="color: var(--text-muted);">Passive web application security and header compliance verification.</p>
+            
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Target URL</span>
+                    <span class="meta-val">https://gemini.google.com/app</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Audit Time</span>
+                    <span class="meta-val">2026-05-25 14:57:26</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Status</span>
+                    <span class="meta-val" style="color: var(--severity-info);">Audit Completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Stat Grid -->
+        <div class="dash-grid">
+            <div class="stat-card">
+                <div class="stat-num" style="color: var(--primary);">5</div>
+                <div class="stat-name">Total Observations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" style="color: var(--severity-high);">0</div>
+                <div class="stat-name">High Risk</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" style="color: var(--severity-medium);">2</div>
+                <div class="stat-name">Medium Risk</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-num" style="color: var(--severity-low);">3</div>
+                <div class="stat-name">Low Risk</div>
+            </div>
+        </div>
+
+        <!-- Section 1: Security Headers -->
+        <div class="section-title">🛡️ Security Response Headers</div>
+        
+        <h3 style="margin-bottom: 0.8rem; font-weight: 500;">Missing Security Protections</h3>
+        
+                <div class="vuln-card">
+                    <div class="vuln-header">
+                        <span class="vuln-title">Missing "Strict-Transport-Security" Header</span>
+                        <span class="badge badge-medium">Medium</span>
+                    </div>
+                    <p class="vuln-desc">Enforces secure (HTTPS) connections to the server.</p>
+                    <div class="vuln-remediation">
+                        <div class="remediation-title">Mitigation / Recommendation</div>
+                        <p>Configure with a max-age (e.g., 'max-age=63072000; includeSubDomains; preload').</p>
+                    </div>
+                </div>
+                
+                <div class="vuln-card">
+                    <div class="vuln-header">
+                        <span class="vuln-title">Missing "Referrer-Policy" Header</span>
+                        <span class="badge badge-low">Low</span>
+                    </div>
+                    <p class="vuln-desc">Controls how much referrer information the browser includes with requests.</p>
+                    <div class="vuln-remediation">
+                        <div class="remediation-title">Mitigation / Recommendation</div>
+                        <p>Set to a restrictive value such as 'strict-origin-when-cross-origin' or 'no-referrer'.</p>
+                    </div>
+                </div>
+                
+        <h3 style="margin: 2rem 0 0.8rem 0; font-weight: 500;">Configured Security Headers</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Header</th>
+                    <th>Configured Value</th>
+                </tr>
+            </thead>
+            <tbody>
+        
+                <tr>
+                    <td class="text-green" style="font-family: monospace;">Content-Security-Policy</td>
+                    <td style="font-family: monospace; font-size: 0.9rem; word-break: break-all;">report-uri /_/BardChatUi/cspreport;default-src 'none';script-src * 'unsafe-inline' 'unsafe-eval' blob: data:;object-src * 'unsafe-inline' 'unsafe-eval';worker-src * 'unsafe-inline' 'unsafe-eval';img-src https://*.google.com https://*.googleusercontent.com https://*.gstatic.com https://*.youtube.com https://*.youtube-nocookie.com https://*.ytimg.com https://*.ggpht.com https://bard.datacommons.org blob: data: https://*.googleapis.com https://*.googletagmanager.com https://www.google.com https://google.com https://googleads.g.doubleclick.net;media-src https://*.google.com https://*.googleusercontent.com https://*.gstatic.com https://*.youtube.com https://*.youtube-nocookie.com https://*.ytimg.com https://*.ggpht.com https://bard.datacommons.org blob: https://*.googlevideo.com https://*.googleapis.com;child-src 'self' https://*.google.com https://*.scf.usercontent.goog https://www.youtube.com https://www.youtube-nocookie.com https://docs.google.com/picker/v2/home blob:;frame-src 'self' https://*.google.com https://*.scf.usercontent.goog https://www.youtube.com https://www.youtube-nocookie.com https://docs.google.com/picker/v2/home blob: https://www.googletagmanager.com https://bid.g.doubleclick.net https://td.doubleclick.net;connect-src 'self' https://*.google.com https://*.gstatic.com https://*.google-analytics.com https://csp.withgoogle.com/csp/proto/BardChatUi https://content-push.googleapis.com/upload/ https://*.googleusercontent.com https://ogads-pa.googleapis.com/ https://*.youtube.com https://*.youtube-nocookie.com https://*.googlevideo.com data: https://static.corp.google.com/external_content/scs_corp/bard/artifacts https://*.googleapis.com;style-src 'report-sample' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com;font-src https://fonts.gstatic.com https://www.gstatic.com;form-action https://ogs.google.com https://onegoogle-autopush.sandbox.google.com https://onegoogle-staging.sandbox.google.com https://studio.firebase.google.com/run.api;manifest-src 'none', require-trusted-types-for 'script';report-uri /_/BardChatUi/cspreport, script-src 'report-sample' 'nonce-jL1uUA3NEcerRBXdLNeT8A' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:;object-src 'none';base-uri 'self';report-uri /_/BardChatUi/cspreport</td>
+                </tr>
+            
+                <tr>
+                    <td class="text-green" style="font-family: monospace;">X-Frame-Options</td>
+                    <td style="font-family: monospace; font-size: 0.9rem; word-break: break-all;">DENY</td>
+                </tr>
+            
+                <tr>
+                    <td class="text-green" style="font-family: monospace;">X-Content-Type-Options</td>
+                    <td style="font-family: monospace; font-size: 0.9rem; word-break: break-all;">nosniff</td>
+                </tr>
+            
+                <tr>
+                    <td class="text-green" style="font-family: monospace;">Permissions-Policy</td>
+                    <td style="font-family: monospace; font-size: 0.9rem; word-break: break-all;">ch-ua-arch=*, ch-ua-bitness=*, ch-ua-full-version=*, ch-ua-full-version-list=*, ch-ua-model=*, ch-ua-wow64=*, ch-ua-form-factors=*, ch-ua-platform=*, ch-ua-platform-version=*</td>
+                </tr>
+            
+            </tbody>
+        </table>
+        
+        <h3 style="margin: 2rem 0 0.8rem 0; font-weight: 500;">Information Leakage & Server Footprints</h3>
+        
+                <div class="vuln-card">
+                    <div class="vuln-header">
+                        <span class="vuln-title">Server Header Leakage: "Server"</span>
+                        <span class="badge badge-low">Low</span>
+                    </div>
+                    <p class="vuln-desc">The header contains values: <code style="font-family: monospace; color: var(--primary);">ESF</code>. Exposes server configuration details which could assist reconnaissance.</p>
+                    <div class="vuln-remediation">
+                        <div class="remediation-title">Mitigation</div>
+                        <p>Remove the 'Server' header or sanitize its value in the server configuration.</p>
+                    </div>
+                </div>
+                
+        <!-- Section 2: Cookie Security flags -->
+        <div class="section-title">🍪 Cookie Security Flags</div>
+        
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-family: monospace; font-size: 1.1rem; color: var(--primary);">Cookie: NID</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">Domain: .google.com | Path: /</p>
+                
+                    <div class="vuln-card" style="margin-left: 1rem; margin-bottom: 0.75rem;">
+                        <div class="vuln-header">
+                            <span class="vuln-title" style="font-size: 1.05rem;">Missing Secure Protection Flag</span>
+                            <span class="badge badge-medium">Medium</span>
+                        </div>
+                        <p class="vuln-desc" style="font-size: 0.9rem;">Cookie lacks the 'Secure' flag, allowing it to be transmitted in cleartext over unencrypted HTTP.</p>
+                        <div class="vuln-remediation" style="padding: 0.75rem; font-size: 0.85rem;">
+                            <p>Configure the application or server to append '; Secure' to the Set-Cookie directive.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="vuln-card" style="margin-left: 1rem; margin-bottom: 0.75rem;">
+                        <div class="vuln-header">
+                            <span class="vuln-title" style="font-size: 1.05rem;">Missing SameSite Protection Flag</span>
+                            <span class="badge badge-low">Low</span>
+                        </div>
+                        <p class="vuln-desc" style="font-size: 0.9rem;">Cookie does not explicitly define a 'SameSite' attribute, relying on default browser behavior.</p>
+                        <div class="vuln-remediation" style="padding: 0.75rem; font-size: 0.85rem;">
+                            <p>Set the 'SameSite' attribute to 'Lax' or 'Strict' to prevent Cross-Site Request Forgery (CSRF).</p>
+                        </div>
+                    </div>
+                    </div>
+        <!-- Section 3: robots.txt -->
+        <div class="section-title">🤖 robots.txt Mapping</div>
+        
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">Discovered 2 crawlers exclusion definitions.</p>
+            
+                <div class="vuln-card" style="border-color: rgba(16, 185, 129, 0.2);">
+                    <div class="vuln-title text-green">✓ Audited robots.txt rules safely. No sensitive patterns (e.g. admin, private) were disclosed inside exclusions.</div>
+                </div>
+                
+    </div>
+</body>
+</html>
